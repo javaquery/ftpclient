@@ -1,0 +1,112 @@
+plugins {
+    id 'java'
+    id 'maven-publish'
+    id 'signing'
+}
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+group 'com.javaquery'
+version '1.0.0'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // annotation bases libraries
+    compileOnly "org.projectlombok:lombok:${lombokVersion}"
+    annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+
+    implementation 'org.slf4j:slf4j-api:2.0.16'
+    implementation 'com.javaquery:util:1.2.7'
+
+    // FTP client libraries
+    implementation 'commons-net:commons-net:3.12.0'
+    implementation 'com.github.mwiede:jsch:2.27.5'
+
+    implementation 'net.logstash.logback:logstash-logback-encoder:8.0'
+
+    testImplementation 'ch.qos.logback:logback-classic:1.5.16'
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.8.1'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+java {
+    withJavadocJar()
+    withSourcesJar()
+}
+
+jar {
+    manifest {
+        attributes(
+                'Built-By': "Vicky Thakor"
+        )
+    }
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            artifactId = 'ftpclient'
+            from components.java
+
+            versionMapping {
+                usage('java-api') {
+                    fromResolutionOf('runtimeClasspath')
+                }
+                usage('java-runtime') {
+                    fromResolutionResult()
+                }
+            }
+            pom {
+                name = 'Java FTP Client'
+                description = 'Java FTP client to extend interaction of http request'
+                url = 'https://github.com/javaquery/ftpclient'
+                licenses {
+                    license {
+                        name = 'MIT'
+                        url = 'https://github.com/javaquery/ftpclient/blob/main/LICENSE'
+                    }
+                }
+                developers {
+                    developer {
+                        id = 'javaquery'
+                        name = 'Vicky Thakor'
+                        email = 'vicky.thakor@javaquery.com'
+                        timezone = '+05:30'
+                    }
+                }
+                scm {
+                    connection = 'scm:git:git://github.com/javaquery/ftpclient.git'
+                    developerConnection = 'scm:git:ssh://github.com/javaquery/ftpclient.git'
+                    url = 'https://github.com/javaquery/ftpclient'
+                }
+            }
+        }
+    }
+    repositories {
+        maven {
+            def releasesRepoUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
+            def snapshotsRepoUrl = "https://oss.sonatype.org/content/repositories/snapshots"
+            url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
+            credentials {
+                username "$mavenCentralUsername"
+                password "$mavenCentralPassword"
+            }
+        }
+    }
+}
+
+signing {
+    sign publishing.publications.mavenJava
+}
+
+javadoc {
+    if (JavaVersion.current().isJava9Compatible()) {
+        options.addBooleanOption('html5', true)
+    }
+}
