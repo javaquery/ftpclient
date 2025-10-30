@@ -16,7 +16,9 @@ public class Credentials {
     private int port;
     private String username;
     private String password;
-    private int connectTimeout = 5000;
-    private int socketTimeout = 5000;
+    @Builder.Default
+    private int connectTimeout = 15000;
+    @Builder.Default
+    private int socketTimeout = 60000;
     private boolean isImplicit;
 }

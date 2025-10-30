@@ -29,6 +29,7 @@ dependencies {
 
     testImplementation 'ch.qos.logback:logback-classic:1.5.16'
     testImplementation 'org.junit.jupiter:junit-jupiter:5.8.1'
+    testImplementation 'org.mockftpserver:MockFtpServer:3.2.0'
 }
 
 test {

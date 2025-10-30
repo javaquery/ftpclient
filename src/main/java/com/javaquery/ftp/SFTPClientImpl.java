@@ -18,7 +18,7 @@ import java.util.Properties;
  * @author javaquery
  * @since 2025-10-30
  */
-public class SFTPClientImpl implements FileTransferClient{
+public class SFTPClientImpl implements FileTransferClient {
 
     private Session session;
     private Channel channel;
@@ -26,7 +26,7 @@ public class SFTPClientImpl implements FileTransferClient{
 
     @Override
     public void connect(Credentials credentials) throws FTPException {
-        try{
+        try {
             JSch jsch = new JSch();
             session = jsch.getSession(credentials.getUsername(), credentials.getHost(), credentials.getPort());
             session.setPassword(credentials.getPassword());
@@ -40,31 +40,31 @@ public class SFTPClientImpl implements FileTransferClient{
             channel = session.openChannel("sftp");
             channel.connect();
             channelSftp = (ChannelSftp) channel;
-        }catch (Exception e){
+        } catch (Exception e) {
             throw new FTPException(e.getMessage(), e);
         }
     }
 
     @Override
     public void disconnect() throws FTPException {
-        try{
-            if(channelSftp != null && channelSftp.isConnected()){
+        try {
+            if (channelSftp != null && channelSftp.isConnected()) {
                 channelSftp.exit();
             }
-            if(channel != null && channel.isConnected()){
+            if (channel != null && channel.isConnected()) {
                 channel.disconnect();
             }
-            if(session != null && session.isConnected()){
+            if (session != null && session.isConnected()) {
                 session.disconnect();
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             throw new FTPException(e.getMessage(), e);
         }
     }
 
     @Override
     public List<RemoteFile> listFiles(String directoryPath, FileFilter<RemoteFile> fileFilter) throws FTPException {
-        if (Is.nonNullNonEmpty(directoryPath)){
+        if (Is.nonNull(directoryPath)) {
             List<RemoteFile> result = new ArrayList<>();
             try {
                 List<ChannelSftp.LsEntry> files = channelSftp.ls(directoryPath);
@@ -82,7 +82,11 @@ public class SFTPClientImpl implements FileTransferClient{
                             .timestamp(timestamp)
                             .path(filepath)
                             .build();
-                    if (Is.nonNull(fileFilter) && fileFilter.accept(remoteFile)) {
+                    if (Is.nonNull(fileFilter)) {
+                        if (fileFilter.accept(remoteFile)) {
+                            result.add(remoteFile);
+                        }
+                    } else {
                         result.add(remoteFile);
                     }
                 }
@@ -97,11 +101,11 @@ public class SFTPClientImpl implements FileTransferClient{
     @Override
     public boolean uploadFile(String localFilePath, String remoteFilePath) throws FTPException {
         boolean result = false;
-        if(Is.nonNullNonEmpty(localFilePath) && Is.nonNullNonEmpty(remoteFilePath)){
-            try{
+        if (Is.nonNullNonEmpty(localFilePath) && Is.nonNullNonEmpty(remoteFilePath)) {
+            try {
                 channelSftp.put(localFilePath, remoteFilePath);
                 result = true;
-            }catch (Exception e){
+            } catch (Exception e) {
                 throw new FTPException(e.getMessage(), e);
             }
         }
@@ -111,11 +115,11 @@ public class SFTPClientImpl implements FileTransferClient{
     @Override
     public boolean downloadFile(String remoteFilePath, String localFilePath) throws FTPException {
         boolean result = false;
-        if(Is.nonNullNonEmpty(remoteFilePath) && Is.nonNullNonEmpty(localFilePath)){
-            try{
+        if (Is.nonNullNonEmpty(remoteFilePath) && Is.nonNullNonEmpty(localFilePath)) {
+            try {
                 channelSftp.get(remoteFilePath, localFilePath);
                 result = true;
-            }catch (Exception e){
+            } catch (Exception e) {
                 throw new FTPException(e.getMessage(), e);
             }
         }
@@ -125,11 +129,11 @@ public class SFTPClientImpl implements FileTransferClient{
     @Override
     public boolean deleteFile(String remoteFilePath) throws FTPException {
         boolean result = false;
-        if(Is.nonNullNonEmpty(remoteFilePath)){
-            try{
+        if (Is.nonNullNonEmpty(remoteFilePath)) {
+            try {
                 channelSftp.rm(remoteFilePath);
                 result = true;
-            }catch (Exception e){
+            } catch (Exception e) {
                 throw new FTPException(e.getMessage(), e);
             }
         }
